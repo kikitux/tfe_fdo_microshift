@@ -3,12 +3,37 @@ resource "kubernetes_pod" "redis" {
     name      = "${var.tag_prefix}-redis"
     namespace = var.namespace
     labels    = { app = "redis" }
+        annotations = {
+      "openshift.io/scc" = "nonroot-v2"
+    }
   }
   spec {
+    security_context {
+      run_as_non_root = true
+      run_as_user     = 999
+      run_as_group    = 999
+      seccomp_profile {
+        type = "RuntimeDefault"
+      }
+    }
+    
     container {
       name  = "redis"
       image = var.image_redis
       args  = ["redis-server", "--save", "", "--appendonly", "no"]
+
+      security_context {
+        allow_privilege_escalation = false
+        capabilities {
+          drop = ["ALL"]
+        }
+        run_as_non_root = true
+        run_as_user     = 999
+        run_as_group    = 999
+        seccomp_profile {
+          type = "RuntimeDefault"
+        }
+      }
 
       port { container_port = 6379 }
 
@@ -34,6 +59,10 @@ resource "kubernetes_pod" "redis" {
       name = "redis-data"
       empty_dir {}
     }
+  }
+
+    lifecycle {
+    ignore_changes = [ spec[0].security_context ]
   }
 }
 

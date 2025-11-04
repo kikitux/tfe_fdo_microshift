@@ -1,7 +1,7 @@
 
 terraform { 
   cloud { 
-    hostname = "tfe1.munnep.com" 
+    hostname = "tfe2.munnep.com" 
     organization = "test" 
 
     workspaces { 

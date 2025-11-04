@@ -13,21 +13,6 @@ resource "kubernetes_secret" "minio_root" {
   type = "Opaque"
 }
 
-resource "kubernetes_persistent_volume_claim" "minio" {
-  metadata {
-    name      = "${var.tag_prefix}-minio-pvc"
-    namespace = var.namespace
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "10Gi"
-      }
-    }
-  }
-}
-
 resource "kubernetes_pod" "minio" {
   metadata {
     name      = "${var.tag_prefix}-minio"
@@ -36,12 +21,37 @@ resource "kubernetes_pod" "minio" {
       app     = "minio"
       storage = "ephemeral"
     }
+        annotations = {
+      "openshift.io/scc" = "nonroot-v2"
+    }
   }
   spec {
+    security_context {
+      run_as_non_root = true
+      run_as_user     = 1001
+      run_as_group    = 1001
+      seccomp_profile {
+        type = "RuntimeDefault"
+      }
+    }
+    
     container {
       name  = "minio"
       image = var.image_minio
       args  = ["server", "/data", "--console-address", ":9001"]
+
+      security_context {
+        allow_privilege_escalation = false
+        capabilities {
+          drop = ["ALL"]
+        }
+        run_as_non_root = true
+        run_as_user     = 1001
+        run_as_group    = 1001
+        seccomp_profile {
+          type = "RuntimeDefault"
+        }
+      }
 
       env {
         name = "MINIO_ROOT_USER"
@@ -93,6 +103,19 @@ resource "kubernetes_pod" "minio" {
     container {
       name  = "minio-init"
       image = "quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z"
+      
+      security_context {
+        allow_privilege_escalation = false
+        capabilities {
+          drop = ["ALL"]
+        }
+        run_as_non_root = true
+        run_as_user     = 1001
+        run_as_group    = 1001
+        seccomp_profile {
+          type = "RuntimeDefault"
+        }
+      }
       env {
         name = "MINIO_ROOT_USER"
         value_from {
@@ -186,10 +209,13 @@ resource "kubernetes_pod" "minio" {
     }
     volume {
       name = "data"
-      persistent_volume_claim {
-        claim_name = kubernetes_persistent_volume_claim.minio.metadata[0].name
-      }
+      empty_dir {}
     }
+  }
+
+
+    lifecycle {
+    ignore_changes = [ spec[0].security_context ]
   }
 }
 

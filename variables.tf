@@ -23,7 +23,7 @@ variable "kubectl_config_path" {
 variable "kubectl_context" {
   description = "The context to use within the kube config file."
   type        = string
-  default     = "tfe"
+  default     = "microshift"
 }
 
 variable "namespace" {

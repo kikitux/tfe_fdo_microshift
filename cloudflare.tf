@@ -8,7 +8,7 @@ data "cloudflare_zones" "main" {
 # Create a Cloudflare Zero Trust Tunnel
 resource "cloudflare_zero_trust_tunnel_cloudflared" "tfe_tunnel" {
   account_id = var.cloudflare_account_id
-  name       = "tfe-tunnel"
+  name       = "tfe-tunnel-microshift"
   config_src = "local"
 }
 
@@ -64,12 +64,35 @@ resource "kubernetes_pod" "cloudflared" {
     labels = {
       app = "cloudflared"
     }
+    annotations = {
+      "openshift.io/scc" = "anyuid"
+    }
   }
 
   spec {
+    security_context {
+      run_as_non_root = true
+      run_as_user     = 65532
+      seccomp_profile {
+        type = "RuntimeDefault"
+      }
+    }
+    
     container {
       name  = "cloudflared"
       image = "docker.io/cloudflare/cloudflared:latest"
+
+      security_context {
+        allow_privilege_escalation = false
+        capabilities {
+          drop = ["ALL"]
+        }
+        run_as_non_root = true
+        run_as_user     = 65532
+        seccomp_profile {
+          type = "RuntimeDefault"
+        }
+      }
 
       args = [
         "tunnel",

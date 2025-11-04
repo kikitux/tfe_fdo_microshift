@@ -16,28 +16,13 @@ service:
   annotations:
   type: ClusterIP
 
-
-agentWorkerPodTemplate:
-  metadata:
-    labels:
-      app: tfe-agent
-      version: default
-  spec:
-    containers:
-    - securityContext:
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-          - ALL
-        seccompProfile:
-          type: RuntimeDefault
-      # Use the full Docker Hub path for minikube compatibility
-      image: docker.io/hashicorp/tfc-agent:latest
+openshift:
+  enabled: true
 
 env:
   variables:
     TFE_CAPACITY_CONCURRENCY: 10
-    TFE_CAPACITY_MEMORY: 4096
+    TFE_CAPACITY_MEMORY: 2048
     TFE_CAPACITY_CPU: 2
     TFE_HOSTNAME: ${fqdn}
     TFE_OPERATIONAL_MODE: active-active
@@ -53,6 +38,8 @@ env:
     TFE_OBJECT_STORAGE_S3_ENDPOINT: ${s3_endpoint}
     TFE_OBJECT_STORAGE_S3_USE_INSTANCE_PROFILE: false
     TFE_ATLAS_REGISTRY_MONOREPO_TOGGLE_ENABLED: 1
+    TFE_RUN_PIPELINE_IMAGE: "patrickmunne3/custom-agent-openshift:v1.4"
+
 
     
     TFE_REDIS_HOST: ${redis_host}:${redis_port}

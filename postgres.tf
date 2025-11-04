@@ -12,31 +12,42 @@ resource "kubernetes_secret" "postgres" {
   type = "Opaque"
 }
 
-resource "kubernetes_persistent_volume_claim" "postgres" {
-  metadata {
-    name      = "${var.tag_prefix}-postgres-pvc"
-    namespace = var.namespace
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "15Gi"
-      }
-    }
-  }
-}
-
 resource "kubernetes_pod" "postgres" {
   metadata {
     name      = "${var.tag_prefix}-postgres"
     namespace = var.namespace
     labels    = { app = "postgres" }
+        annotations = {
+      "openshift.io/scc" = "nonroot-v2"
+    }
   }
   spec {
+    security_context {
+      run_as_non_root = true
+      run_as_user     = 70
+      run_as_group    = 70
+      fs_group        = 70
+      seccomp_profile {
+        type = "RuntimeDefault"
+      }
+    }
+    
     container {
       name  = "postgres"
       image = var.image_postgres
+
+      security_context {
+        allow_privilege_escalation = false
+        capabilities {
+          drop = ["ALL"]
+        }
+        run_as_non_root = true
+        run_as_user     = 70
+        run_as_group    = 70
+        seccomp_profile {
+          type = "RuntimeDefault"
+        }
+      }
 
       port { container_port = 5432 }
 
@@ -67,6 +78,10 @@ resource "kubernetes_pod" "postgres" {
           }
         }
       }
+      env {
+        name  = "PGDATA"
+        value = "/var/lib/postgresql/data/pgdata"
+      }
 
       readiness_probe {
         exec { command = ["/bin/sh", "-c", "pg_isready -U $POSTGRES_USER"] }
@@ -90,11 +105,13 @@ resource "kubernetes_pod" "postgres" {
 
     volume {
       name = "pgdata"
-      persistent_volume_claim {
-        claim_name = kubernetes_persistent_volume_claim.postgres.metadata[0].name
-      }
+      empty_dir {}
     }
     restart_policy = "Always"
+  }
+
+    lifecycle {
+    ignore_changes = [ spec[0].security_context ]
   }
 }
 
