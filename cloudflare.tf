@@ -127,6 +127,10 @@ resource "kubernetes_pod" "cloudflared" {
       }
     }
   }
+
+      lifecycle {
+    ignore_changes = [ spec[0].security_context, metadata[0].annotations ]
+  }
 }
 
 output "cloudflare_login_command" {
