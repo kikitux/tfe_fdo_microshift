@@ -1,10 +1,10 @@
 # General
-variable "route53_zone" {
+variable "dns_zone" {
   description = "The domain used in the URL."
   type        = string
 }
 
-variable "route53_subdomain" {
+variable "dns_subdomain" {
   description = "the subdomain of the url"
   type        = string
 }

@@ -1,3 +1,3 @@
 locals {
-  fqdn = "${var.route53_subdomain}.${var.route53_zone}"
+  fqdn = "${var.dns_subdomain}.${var.dns_zone}"
 }

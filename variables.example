@@ -1,6 +1,6 @@
 # General
-route53_zone        = "munnep.com"                          # Main domain for Route53
-route53_subdomain   = "tfe1"                           # Subdomain for TFE
+dns_zone        = "munnep.com"                          # Main domain for DNS
+dns_subdomain   = "tfe1"                           # Subdomain for TFE
 cert_email          = "patrick.munne@ibm.com"                 # Email for certificate generation
 kubectl_config_path = "/Users/patrick/.kube/config" # Full path to kubeconfig file
 
