@@ -6,11 +6,11 @@ image:
 
 resources:
   requests:
-    memory: "2000Mi"
-    cpu: "2"
+    memory: "500Mi"
+    cpu: "250m"
   limits:
     memory: "6000Mi"
-    cpu: "4"
+    cpu: "4000m"
 
 service:
   annotations:
@@ -40,8 +40,6 @@ env:
     TFE_ATLAS_REGISTRY_MONOREPO_TOGGLE_ENABLED: 1
     TFE_RUN_PIPELINE_IMAGE: ${tfe_agent_image}
 
-
-    
     TFE_REDIS_HOST: ${redis_host}:${redis_port}
     TFE_IACT_SUBNETS: "0.0.0.0/0"
 
@@ -55,5 +53,3 @@ tls:
   keyData: ${key_data}
   caCertData: ${ca_cert_data}
 
-
-  
