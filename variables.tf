@@ -39,6 +39,12 @@ variable "namespace" {
   default     = "terraform-enterprise"
 }
 
+variable "dep_namespace" {
+  description = "Kubernetes namespace to deploy dependencies into."
+  type        = string
+  default     = "terraform-enterprise"
+}
+
 variable "tag_prefix" {
   description = "Prefix for naming Kubernetes resources."
   type        = string

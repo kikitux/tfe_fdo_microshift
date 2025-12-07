@@ -2,7 +2,7 @@
 resource "kubernetes_secret" "minio_root" {
   metadata {
     name      = "${var.tag_prefix}-minio-root-credentials"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
   data = {
     rootUser     = var.minio_user
@@ -16,7 +16,7 @@ resource "kubernetes_secret" "minio_root" {
 resource "kubernetes_pod" "minio" {
   metadata {
     name      = "${var.tag_prefix}-minio"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
     labels = {
       app     = "minio"
       storage = "ephemeral"
@@ -226,7 +226,7 @@ resource "kubernetes_pod" "minio" {
 resource "kubernetes_service" "minio" {
   metadata {
     name      = "${var.tag_prefix}-minio"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
   spec {
     selector = {

@@ -1,7 +1,7 @@
 resource "kubernetes_pod" "redis" {
   metadata {
     name      = "${var.tag_prefix}-redis"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
     labels    = { app = "redis" }
     annotations = {
       "openshift.io/scc" = "nonroot-v2"
@@ -73,7 +73,7 @@ resource "kubernetes_pod" "redis" {
 resource "kubernetes_service" "redis" {
   metadata {
     name      = "${var.tag_prefix}-redis"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
   spec {
     selector = { app = "redis" }
@@ -92,5 +92,5 @@ resource "kubernetes_service" "redis" {
 # }
 
 # output "redis_endpoint" {
-#   value = "${kubernetes_service.redis.metadata[0].name}.${var.namespace}.svc.cluster.local:${kubernetes_service.redis.spec[0].port[0].port}"
+#   value = "${kubernetes_service.redis.metadata[0].name}.${local.dep_namespace}.svc.cluster.local:${kubernetes_service.redis.spec[0].port[0].port}"
 # }
