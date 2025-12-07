@@ -1,10 +1,32 @@
 # Introduction
 
-This repository will create a Terraform Enterprise environment locally. 
-It is tested on MacOS with MicroShift as an OpenShift environment.  
-OpenShift is run on Podman Desktop.  
-Cloudflare is used for DNS record and TFE certificate creation.  
-You must have a cloudflare api token configured with DNS and Tunnel permissions.  
+This repository provides a complete **Terraform Enterprise (TFE) development environment** that runs locally on macOS, designed for testing, development, and learning purposes. 
+
+## Architecture Overview
+
+The setup creates a production-like TFE environment using modern containerization and cloud-native technologies:
+
+- **🖥️ Local Development**: Runs entirely on macOS using Podman Desktop with MicroShift (lightweight OpenShift)
+- **☁️ External Access**: Leverages Cloudflare tunnels for secure external connectivity without port forwarding
+- **🔒 Enterprise Security**: Includes proper SSL certificates and DNS management through Cloudflare
+- **📦 Microservices Architecture**: Deploys TFE alongside supporting services (PostgreSQL, MinIO, Redis) as Kubernetes pods
+
+## Key Components
+
+- **MicroShift**: Lightweight OpenShift distribution running in Podman containers
+- **Terraform Enterprise**: Full TFE installation with persistent storage and session management
+- **Cloudflare Integration**: Automated DNS records and secure tunnel connections for external access
+- **Supporting Services**: PostgreSQL (database), MinIO (S3-compatible storage), Redis (caching), and cloudflared (tunnel agent)
+
+## Prerequisites
+
+- macOS with sufficient resources (recommended: 6+ CPU cores, 12+ GB RAM)
+- Cloudflare account with API token (DNS and Tunnel permissions required)
+- Podman Desktop installed and configured  
+
+# Diagram
+![](diagram/diagram_tfe_fdo_microshift.png)  
+
 
 # Prepare code
 ## Git
@@ -48,6 +70,10 @@ To enable this in Podman: https://podman-desktop.io/docs/openshift/microshift
 
 Enable the MINC extension  
 ![](media/2025-11-04-11-08-55.png)  
+
+Go to Settings and then Resources and create a Microshift Minc cluster:
+![](media/2025-11-05-10-54-31.png)
+Leave the default ports and click create.
 
 
 ## View in Podman Desktop
