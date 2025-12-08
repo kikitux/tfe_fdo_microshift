@@ -8,7 +8,7 @@ data "cloudflare_zones" "main" {
 # Create a Cloudflare Zero Trust Tunnel
 resource "cloudflare_zero_trust_tunnel_cloudflared" "tfe_tunnel" {
   account_id = var.cloudflare_account_id
-  name       = "tfe-tunnel-microshift"
+  name       = "${var.tag_prefix}-tunnel-microshift"
   config_src = "local"
 }
 

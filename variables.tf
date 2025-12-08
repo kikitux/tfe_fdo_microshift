@@ -169,3 +169,8 @@ variable "helm_timeout" {
   default     = 600
 }
 
+variable "acme_server_url" {
+  description = "acme server url to use"
+  type        = string
+  default     = "https://acme-v02.api.letsencrypt.org/directory"
+}

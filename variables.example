@@ -24,6 +24,13 @@ image_postgres    = "docker.io/library/postgres:16" # Postgres Docker image (ful
 # Redis
 image_redis = "docker.io/library/redis:7" # Redis Docker image (full path)
 
+# Acme
+# acme prod
+# acme_server_url         = "https://acme-v02.api.letsencrypt.org/directory"
+
+# acme staging
+# acme_server_url         = "https://acme-staging-v02.api.letsencrypt.org/directory"
+
 # TFE
 admin_username          = "admin"                                               # Username for TFE admin user
 admin_email             = "patrick.munne@ibm.com"                               # Email for TFE admin user
@@ -31,6 +38,7 @@ admin_password          = "secret$321"                                          
 tfe_encryption_password = "secret$321"                                          # Encryption password for TFE
 release_sequence        = "1.0.2"                                               # TFE release sequence
 tfe_raw_license         = "xxxxxxxx"                                            # License string for TFE
+tag_prefix 		= "tfe" 						# Prefix for naming resources
 
 # NS
 namespace     = "terraform-enterprise" # namespace for terraform enterprise
