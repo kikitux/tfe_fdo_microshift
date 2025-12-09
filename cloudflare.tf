@@ -8,7 +8,7 @@ data "cloudflare_zones" "main" {
 # Create a Cloudflare Zero Trust Tunnel
 resource "cloudflare_zero_trust_tunnel_cloudflared" "tfe_tunnel" {
   account_id = var.cloudflare_account_id
-  name       = "tfe-tunnel-microshift"
+  name       = "${var.tag_prefix}-tunnel-microshift"
   config_src = "local"
 }
 
@@ -33,7 +33,7 @@ resource "cloudflare_dns_record" "tunnel_dns" {
 resource "kubernetes_secret" "tunnel_credentials" {
   metadata {
     name      = "tunnel-credentials"
-    namespace = kubernetes_namespace.terraform_enterprise.metadata[0].name
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
 
   data = {
@@ -45,13 +45,14 @@ resource "kubernetes_secret" "tunnel_credentials" {
 resource "kubernetes_config_map" "tunnel_config" {
   metadata {
     name      = "tunnel-config"
-    namespace = kubernetes_namespace.terraform_enterprise.metadata[0].name
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
 
   data = {
-    "config.yaml" = templatefile("${path.module}/scripts/cloudflare_tunnel_config.yaml", {
+    "config.yaml" = templatefile("${path.module}/scripts/cloudflare_tunnel_config.tpl", {
       tunnel_id = cloudflare_zero_trust_tunnel_cloudflared.tfe_tunnel.id
       fqdn      = local.fqdn
+      namespace = kubernetes_namespace.terraform_enterprise[var.namespace].metadata.0.name
     })
   }
 }
@@ -60,7 +61,7 @@ resource "kubernetes_config_map" "tunnel_config" {
 resource "kubernetes_pod" "cloudflared" {
   metadata {
     name      = "cloudflared"
-    namespace = kubernetes_namespace.terraform_enterprise.metadata[0].name
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
     labels = {
       app = "cloudflared"
     }
@@ -96,6 +97,10 @@ resource "kubernetes_pod" "cloudflared" {
 
       args = [
         "tunnel",
+        "--edge-ip-version",
+        "4",
+        "--protocol",
+        "http2",
         "--config",
         "/etc/cloudflared/config.yaml",
         "run",
@@ -130,6 +135,9 @@ resource "kubernetes_pod" "cloudflared" {
 
   lifecycle {
     ignore_changes = [spec[0].security_context, metadata[0].annotations]
+    replace_triggered_by = [
+      kubernetes_config_map.tunnel_config
+    ]
   }
 }
 
@@ -146,3 +154,4 @@ output "cloudflare_delete_tunnel_command" {
   #value = "cloudflared tunnel delete ${cloudflare_zero_trust_tunnel_cloudflared.tfe_tunnel.id}"
   value = "cloudflared tunnel delete ${cloudflare_zero_trust_tunnel_cloudflared.tfe_tunnel.name}"
 }
+

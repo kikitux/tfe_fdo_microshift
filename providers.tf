@@ -1,9 +1,5 @@
 terraform {
   required_providers {
-    # minikube = {
-    #   source = "scott-the-programmer/minikube"
-    #   version = "0.5.3"
-    # }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.38.0"
@@ -23,11 +19,6 @@ terraform {
   }
 }
 
-# minikube provider is not working, so commenting it out for now
-# provider "minikube" {
-#   kubernetes_version = "v1.34.0"
-# }
-
 provider "kubernetes" {
   config_path    = var.kubectl_config_path
   config_context = var.kubectl_context
@@ -41,7 +32,7 @@ provider "helm" {
 }
 
 provider "acme" {
-  server_url = "https://acme-v02.api.letsencrypt.org/directory"
+  server_url = var.acme_server_url
 }
 
 provider "cloudflare" {

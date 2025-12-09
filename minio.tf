@@ -2,7 +2,7 @@
 resource "kubernetes_secret" "minio_root" {
   metadata {
     name      = "${var.tag_prefix}-minio-root-credentials"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
   data = {
     rootUser     = var.minio_user
@@ -16,7 +16,7 @@ resource "kubernetes_secret" "minio_root" {
 resource "kubernetes_pod" "minio" {
   metadata {
     name      = "${var.tag_prefix}-minio"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
     labels = {
       app     = "minio"
       storage = "ephemeral"
@@ -213,17 +213,20 @@ resource "kubernetes_pod" "minio" {
     }
   }
 
-
   lifecycle {
-    ignore_changes = [spec[0].security_context]
+    ignore_changes = [
+      spec[0].security_context,
+      metadata[0].annotations["security.openshift.io/validated-scc-subject-type"],
+    ]
   }
+
 }
 
 # Service
 resource "kubernetes_service" "minio" {
   metadata {
     name      = "${var.tag_prefix}-minio"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
   spec {
     selector = {

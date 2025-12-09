@@ -9,6 +9,6 @@ originRequest:
 # You can omit originRequest here since it inherits from the global section
 ingress:
   - hostname: ${fqdn}
-    service: https://terraform-enterprise:443
+    service: https://terraform-enterprise.${namespace}:443
   # Catch-all rule
   - service: http_status:404

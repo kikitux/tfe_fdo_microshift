@@ -29,12 +29,17 @@ variable "kubectl_context" {
 variable "tfe_agent_image" {
   description = "Docker image for the TFE agent ."
   type        = string
-  default     = "patrickmunne3/custom-agent-openshift:v1.4"
+  default     = "docker.io/patrickmunne3/custom-agent-openshift:v1.4"
 }
-
 
 variable "namespace" {
   description = "Kubernetes namespace to deploy resources into."
+  type        = string
+  default     = "terraform-enterprise"
+}
+
+variable "dep_namespace" {
+  description = "Kubernetes namespace to deploy dependencies into."
   type        = string
   default     = "terraform-enterprise"
 }
@@ -158,3 +163,14 @@ variable "replica_count" {
   default     = 1
 }
 
+variable "helm_timeout" {
+  description = "timeout for helm"
+  type        = number
+  default     = 600
+}
+
+variable "acme_server_url" {
+  description = "acme server url to use"
+  type        = string
+  default     = "https://acme-v02.api.letsencrypt.org/directory"
+}

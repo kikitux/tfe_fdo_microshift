@@ -2,7 +2,7 @@
 resource "kubernetes_secret" "postgres" {
   metadata {
     name      = "${var.tag_prefix}-postgres-secret"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
   }
   data = {
     POSTGRES_USER     = var.postgres_user
@@ -15,7 +15,7 @@ resource "kubernetes_secret" "postgres" {
 resource "kubernetes_pod" "postgres" {
   metadata {
     name      = "${var.tag_prefix}-postgres"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
     labels    = { app = "postgres" }
     annotations = {
       "openshift.io/scc" = "nonroot-v2"
@@ -111,14 +111,18 @@ resource "kubernetes_pod" "postgres" {
   }
 
   lifecycle {
-    ignore_changes = [spec[0].security_context]
+    ignore_changes = [
+      spec[0].security_context,
+      metadata[0].annotations["security.openshift.io/validated-scc-subject-type"],
+    ]
   }
+
 }
 
 resource "kubernetes_service" "postgres" {
   metadata {
     name      = "${var.tag_prefix}-postgres"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.terraform_enterprise[var.dep_namespace].metadata.0.name
     labels    = { app = "postgres" }
   }
   spec {
@@ -138,7 +142,7 @@ resource "kubernetes_service" "postgres" {
 # }
 
 # output "postgres_endpoint" {
-#   value = "${kubernetes_service.postgres.metadata[0].name}.${var.namespace}.svc.cluster.local:${kubernetes_service.postgres.spec[0].port[0].port}"
+#   value = "${kubernetes_service.postgres.metadata[0].name}.${var.dep_namespace}.svc.cluster.local:${kubernetes_service.postgres.spec[0].port[0].port}"
 # }
 
 output "postgres_url" {

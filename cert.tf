@@ -40,3 +40,4 @@ resource "local_file" "ca" {
   content  = acme_certificate.certificate.issuer_pem
   filename = "${path.module}/certs/ca.pem"
 }
+
